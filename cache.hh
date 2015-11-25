@@ -2,7 +2,7 @@
 #define _CACHE_LINE_
 
 
-#define ADDR_SIZE 32
+#define ADDR_SIZE 64
 #define CACHE_SIZE_KB 32
 #define BLOCK_SIZE 32
 #define ASSOC 4
@@ -18,22 +18,22 @@ class CacheLine {
 private:
   STATE state; 
   unsigned int tag;
-  //bool valid;
+  bool valid;
 
 
 public:
   CacheLine(){
     tag = 0;
     state = INVALID;
-    //valid = false;
+    valid = false;
   }
   ~CacheLine(){};
 
   unsigned int getTag(){return tag;}
   void setTag(unsigned int _tag ) { tag = _tag; }
 
-  //bool getValid(){ return valid; }
-  //void setValid(bool _valid){ valid = _valid; }
+  bool getValid(){ return valid; }
+  void setValid(bool _valid){ valid = _valid; }
 
   STATE getState(){ return state; }
   void setState( STATE _state ) { state =_state; }
@@ -62,7 +62,7 @@ public:
     for(int i=0; i<ASSOC; i++){
       //TODO: check valid
       //if(_cache_line[i].getState != INVALID){
-        if(_cache_line[i].getTag() == tag){
+        if(_cache_line[i].getTag() == tag && _cache_line[i].getValid()){
           //fprintf(stderr, "Hit %d\n", i);
           *hit = true;
           MRU = i;
@@ -80,6 +80,7 @@ public:
       }
       //fprintf(stderr, "Miss %d\n", MRU);
       _cache_line[MRU].setTag(tag);
+      _cache_line[MRU].setValid(true);
 
     }
     return &_cache_line[MRU];
@@ -91,7 +92,7 @@ public:
     for(int i=0; i<ASSOC; i++){
       //TODO: check valid
       //if(_cache_line[i].getState != INVALID){
-        if(_cache_line[i].getTag() == tag){
+        if(_cache_line[i].getTag() == tag && _cache_line[i].getValid()){
           //fprintf(stderr, "Remote Hit %d\n", i);
           hit = true;
           MRU = i;
